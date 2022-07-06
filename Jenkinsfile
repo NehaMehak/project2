@@ -1,39 +1,39 @@
-pipeline {
- environment {
- imagename = "nehamehak/jenkinsdocker"
- registryCredential = "dockerhub-cred-neha"
- dockerImage = ''
- }
- agent any
- stages {
- stage('Cloning Git') {
- steps {
- git([url: 'https://github.com/NehaMehak/project2.git', branch: ‘main’])
- }
- }
- stage('Building image') {
- steps{
- script {
- dockerImage = docker.build imagename
- }
- }
- }
- stage('Running image') {
- steps{
- script {
- sh "docker run ${imagename}:latest"
- }
- }
- }
- stage('Deploy Image') {
- steps{
- script {
- docker.withRegistry( '', registryCredential ) {
- dockerImage.push("$BUILD_NUMBER")
- dockerImage.push('latest')
- }
- }
- }
- }
- }
+pipeline{
+
+	agent any
+
+	environment {
+		DOCKERHUB_CREDENTIALS=credentials('nehamehak/jenkinsdocker')
+	}
+
+	stages {
+
+		stage('Build') {
+
+			steps {
+				sh 'docker build -t nehamehak/jenkinsdocker:latest .'
+			}
+		}
+
+		stage('Login') {
+
+			steps {
+				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			}
+		}
+
+		stage('Push') {
+
+			steps {
+				sh 'docker push nehamehak/jenkinsdocker:latest'
+			}
+		}
+	}
+
+	post {
+		always {
+			sh 'docker logout'
+		}
+	}
+
 }
