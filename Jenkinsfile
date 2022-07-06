@@ -1,6 +1,6 @@
 pipeline {
  environment {
- imagename = "nehamehak/jenkins-docker"
+ imagename = "nehamehak/jenkinsdocker"
  registryCredential = "dockerhub-cred-neha"
  dockerImage = ''
  }
